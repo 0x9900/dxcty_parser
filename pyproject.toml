@@ -4,7 +4,7 @@
 
 [project]
     name = "cty_parser"
-    version = "0.0.1"
+    version = "0.0.2"
     description = "A simple cty parser library."
     readme = "README.md"
     authors = [
