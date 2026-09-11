@@ -19,7 +19,7 @@
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.10",
     ]
-    
+
 [tool.setuptools]
     packages = ["cty_parser"]
 
@@ -43,4 +43,5 @@
         "mypy",
         "pre-commit",
         "pylint",
+        "twine",
     ]

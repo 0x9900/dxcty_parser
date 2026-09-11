@@ -35,7 +35,7 @@ import shutil
 import time
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -58,7 +58,7 @@ _ALIAS_OVERRIDE_RE = re.compile(
 
 
 @dataclass(slots=True)
-class Entity:
+class Entity:  # pylint: disable=too-many-instance-attributes
   """A DXCC entity (country) entry from cty.dat."""
   country: str
   cq_zone: int
@@ -154,7 +154,7 @@ def _parse_alias(raw: str, base_entity: Entity) -> Optional[PrefixEntry]:
     return None
   prefix, overrides_str = m.group(1).strip(), m.group(2)
 
-  overrides = {}
+  overrides: dict[str, Any] = {}
   for om in _ALIAS_OVERRIDE_RE.finditer(overrides_str):
     if om.group("cq"):
       overrides["cq_zone"] = int(om.group("cq"))
@@ -244,18 +244,16 @@ class CtyTable:
 
   def lookup(self, callsign: str) -> Optional[PrefixEntry]:
     callsign = callsign.strip().upper()
-
     exact = self._exact.get(callsign)
     if exact is not None:
       return exact
 
     node = self._root
     best: Optional[PrefixEntry] = None
-    idx = 0
-    for idx, ch in enumerate(callsign):
-      node = node.children.get(ch)
-      if node is None:
+    for ch in callsign:
+      if (next_node := node.children.get(ch)) is None:
         break
+      node = next_node
       if node.entry is not None:
         best = node.entry
     return best
@@ -272,7 +270,7 @@ def url_retrieve(url: str, filepath: Path):
 
   headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 CtyParser"}
   if etag:
-    headers["If-None-Match"] = etag
+    headers["If-None-Match"] = str(etag)
 
   request = Request(url, headers=headers)
   try:
