@@ -1,0 +1,46 @@
+[build-system]
+    requires = ["setuptools", "wheel"]
+    build-backend = "setuptools.build_meta"
+
+[project]
+    name = "cty_parser"
+    version = "0.0.1"
+    description = "A simple cty parser library."
+    readme = "README.md"
+    authors = [
+        { name = "Fred C", email = "w6bsd@bsdworld.org" }
+    ]
+    license = "BSD-3-Clause"
+    requires-python = ">=3.10"
+    classifiers = [
+        "Intended Audience :: Telecommunications Industry",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.10",
+    ]
+    
+[tool.setuptools]
+    packages = ["cty_parser"]
+
+[tool.setuptools.package-data]
+    "cty_parser" = ["py.typed"]
+
+[project.urls]
+    Source = "https://github.com/0x9900/cty_parser"
+    Tracker = "https://github.com/0x9900/cty_parser/issues"
+
+[project.scripts]
+    cty_parser = "cty_parser:main"
+
+[project.optional-dependencies]
+    dev = [
+        "build",
+        "flake8",
+        "ipdb",
+        "ipython",
+        "isort",
+        "mypy",
+        "pre-commit",
+        "pylint",
+    ]
