@@ -1,4 +1,4 @@
-# cty_parser
+# dxcty_parser
 
 Parse [cty.dat](https://www.country-files.com/cty-dat-format/) (the AD1C
 "country file") and resolve amateur radio callsigns to DXCC entities —
@@ -7,7 +7,7 @@ country, CQ zone, ITU zone, continent, lat/long, and GMT offset.
 ## Usage
 
 ```python
-from cty_parser import load_cty
+from dxcty_parser import load_cty
 
 table = load_cty()  # build once, reuse for many lookups
 
@@ -18,7 +18,7 @@ print(result.entity.country, result.entity.cq_zone)
 ## CLI
 
 ```
-python cty_parser.py W1AW KM6ETX
+python dxcty_parser.py W1AW KM6ETX
 ```
 
 ## Requirements

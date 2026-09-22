@@ -30,10 +30,10 @@ pre-commit:
 
 # Pylint: Run code linting
 pylint:
-	-pylint cty_parser
+	-pylint dxcty_parser
 
 mypy:
-	-mypy cty_parser
+	-mypy dxcty_parser
 
 # Build: Build the Python package
 build: clean all

@@ -321,7 +321,7 @@ def main():
   import sys  # pylint: disable=import-outside-toplevel
 
   if len(sys.argv) < 1:
-    print("Usage: python cty_parser.py [CALLSIGN ...]")
+    print("Usage: python dxcty_parser.py [CALLSIGN ...]")
     raise SystemExit(1)
 
   table = load_cty()

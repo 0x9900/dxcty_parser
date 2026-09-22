@@ -3,9 +3,9 @@
     build-backend = "setuptools.build_meta"
 
 [project]
-    name = "cty_parser"
+    name = "dxcty_parser"
     version = "0.0.2"
-    description = "A simple cty parser library."
+    description = "A simple ham radio cty parser library."
     readme = "README.md"
     authors = [
         { name = "Fred C", email = "w6bsd@bsdworld.org" }
@@ -21,17 +21,17 @@
     ]
 
 [tool.setuptools]
-    packages = ["cty_parser"]
+    packages = ["dxcty_parser"]
 
 [tool.setuptools.package-data]
-    "cty_parser" = ["py.typed"]
+    "dxcty_parser" = ["py.typed"]
 
 [project.urls]
-    Source = "https://github.com/0x9900/cty_parser"
-    Tracker = "https://github.com/0x9900/cty_parser/issues"
+    Source = "https://github.com/0x9900/dxcty_parser"
+    Tracker = "https://github.com/0x9900/dxcty_parser/issues"
 
 [project.scripts]
-    cty_parser = "cty_parser:main"
+    dxcty_parser = "dxcty_parser:main"
 
 [project.optional-dependencies]
     dev = [
