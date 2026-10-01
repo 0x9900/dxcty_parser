@@ -41,7 +41,7 @@ from urllib.request import Request, urlopen
 
 __all__ = ['load_cty']
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
