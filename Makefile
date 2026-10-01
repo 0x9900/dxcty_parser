@@ -45,3 +45,7 @@ dev:
 
 dep:
 	pip install --only-deps .
+
+upload: build
+	wheel=$$(ls -t dist/*.whl | head -n 1); \
+	python -m twine upload $$wheel
