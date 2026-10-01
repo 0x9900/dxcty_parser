@@ -41,6 +41,8 @@ from urllib.request import Request, urlopen
 
 __all__ = ['load_cty']
 
+__version__ = '0.0.3'
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 SOURCE_URL = "https://www.country-files.com/cty/cty_wt_mod.dat"

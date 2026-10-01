@@ -4,7 +4,7 @@
 
 [project]
     name = "dxcty_parser"
-    version = "0.0.3"
+    dynamic = ["version"]
     description = "A simple ham radio cty parser library."
     readme = "README.md"
     authors = [
@@ -25,6 +25,9 @@
 
 [tool.setuptools.package-data]
     "dxcty_parser" = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = {attr = "dxcty_parser.__version__"}
 
 [project.urls]
     Source = "https://github.com/0x9900/dxcty_parser"
