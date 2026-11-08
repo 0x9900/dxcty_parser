@@ -1,27 +1,43 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# vim:fenc=utf-8
+#
+# Copyright (C) 2026 fred <github-fred@hidzz.com>
+#
+# Distributed under terms of the BSD 3-Clause license.
+#
+#  Parser for cty.dat (CT9 "Country File") as used by ham radio contest
+#  logging software (CT, N1MM, etc.) to resolve DXCC entities from callsigns.
+#
+#  Format reference: https://www.country-files.com/cty-dat-format/
+#
+#  Each entity record looks like:
+#
+#      Country Name:CQ:ITU:Cont:Lat:Long:GMTOff:PrimaryPfx:
+#          =ALIAS1,ALIAS2(14)[27],ALIAS3{EU}<40.5/-74.0>~-5~;
+#
+#  - The 8 header fields are colon-delimited.
+#  - A "*" preceding the primary prefix marks a WAEDC (DARC) entity.
+#  - Alias prefixes (including the primary one) follow, comma-separated,
+#    possibly spanning multiple lines, terminated by ";".
+#  - A leading "=" on an alias means it must match a *full callsign* exactly,
+#    not just a prefix.
+#  - Trailing modifiers on an alias override fields for that alias only:
+#      (#)      override CQ zone
+#      [#]      override ITU zone
+#      <lat/lon> override latitude/longitude
+#      {aa}     override continent
+#      ~#~      override local GMT offset
+
 """
-Parser for cty.dat (CT9 "Country File") as used by ham radio contest
-logging software (CT, N1MM, etc.) to resolve DXCC entities from callsigns.
-
-Format reference: https://www.country-files.com/cty-dat-format/
-
-Each entity record looks like:
-
-    Country Name:CQ:ITU:Cont:Lat:Long:GMTOff:PrimaryPfx:
-        =ALIAS1,ALIAS2(14)[27],ALIAS3{EU}<40.5/-74.0>~-5~;
-
-- The 8 header fields are colon-delimited.
-- A "*" preceding the primary prefix marks a WAEDC (DARC) entity.
-- Alias prefixes (including the primary one) follow, comma-separated,
-  possibly spanning multiple lines, terminated by ";".
-- A leading "=" on an alias means it must match a *full callsign* exactly,
-  not just a prefix.
-- Trailing modifiers on an alias override fields for that alias only:
-    (#)      override CQ zone
-    [#]      override ITU zone
-    <lat/lon> override latitude/longitude
-    {aa}     override continent
-    ~#~      override local GMT offset
+cty_table = load_cty()
+result = cty_table.lookup('W6BSD')
+if result:
+    e = result.entity
+    print(f"{call}: {e.country} ({e.primary_prefix}) CQ={e.cq_zone} "
+          f"ITU={e.itu_zone} Cont={e.continent} GMT={e.gmt_offset} "
+          f"Latitude={e.latitude}, Longitude={e.longitude}")
+else:
+    print(f"{call}: no match")
 """
 
 from __future__ import annotations
@@ -48,7 +64,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 SOURCE_URL = "https://www.country-files.com/cty/cty_wt_mod.dat"
 DATA_PATH = "/tmp/cty_wt_mod.dat"
 
-MAX_CACHE = 86400 * 7      # One week
+MAX_CACHE = 24 * 7      # One week
 
 _ALIAS_OVERRIDE_RE = re.compile(
   r"\((?P<cq>-?\d+)\)"
@@ -81,10 +97,16 @@ class PrefixEntry:
   entity: Entity
 
 
-def file_cache(cache_dir=".cache"):
+def file_cache(cache_dir: Path | str = ".cache", expire: int = MAX_CACHE):
+  """File cache decorator used to cache large objects.
+  Expire is in hours"""
+
+  default_dir = Path(cache_dir)
+  default_expire = expire
+
   def decorator(func):
     # Create cache directory if it doesn't exist
-    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+    default_dir.mkdir(parents=True, exist_ok=True)
 
     def _gen_key(func_name, args):
       key_str = '.'.join([str(a) for a in args]).encode('utf-8')
@@ -94,13 +116,17 @@ def file_cache(cache_dir=".cache"):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+      cache_dir = Path(kwargs.pop('cache_dir', default_dir))
+      max_cache_age = int(kwargs.pop('expire', default_expire)) * 3600
+      cache_dir.mkdir(parents=True, exist_ok=True)
+
       # Create a unique cache key from arguments
       cache_key = _gen_key(func.__name__, args)
-      cache_file = Path(cache_dir) / f"{cache_key}.pkl"
+      cache_file = cache_dir / f"{cache_key}.pkl"
       logging.info(cache_file)
 
       # Try to load from cache
-      if cache_file.exists() and cache_file.stat().st_mtime + MAX_CACHE > time.time():
+      if cache_file.exists() and cache_file.stat().st_mtime + max_cache_age > time.time():
         try:
           with open(cache_file, 'rb') as f:
             result = pickle.load(f)
@@ -296,8 +322,7 @@ def url_retrieve(url: str, filepath: Path):
 
 @file_cache('/tmp')
 def load_cty(filepath: Path | str = DATA_PATH) -> CtyTable:
-  if isinstance(filepath, str):
-    filepath = Path(filepath)
+  filepath = Path(filepath)
 
   url_retrieve(SOURCE_URL, filepath)
   prefixes = parse_cty_dat(filepath)
@@ -331,6 +356,8 @@ def main():
   for call in sys.argv[1:]:
     result = table.lookup(call)
     if result:
+      print(f'Prefix: {result.prefix}')
+      print(f'Exact match: {result.exact_match}')
       e = result.entity
       print(f"{call}: {e.country} ({e.primary_prefix}) CQ={e.cq_zone} "
             f"ITU={e.itu_zone} Cont={e.continent} GMT={e.gmt_offset} "
